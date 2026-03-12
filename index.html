@@ -315,8 +315,56 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 3px;
 }
 .h-num { font-size: 9px; color: var(--ink3); }
+
+/* 季節タグ */
+.season-tag {
+  writing-mode: vertical-rl;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  padding: 3px 3px;
+  border-radius: 2px;
+  line-height: 1.4;
+  font-family: 'Noto Serif JP', serif;
+}
+.season-spring { background: rgba(220,170,180,0.2); color: #a05070; }
+.season-summer { background: rgba(60,140,100,0.15); color: #1a7a50; }
+.season-autumn { background: rgba(180,120,40,0.18); color: #8a5a10; }
+.season-winter { background: rgba(80,120,180,0.15); color: #2a5090; }
+.season-new    { background: rgba(180,146,42,0.18); color: #8a6010; }
+.season-none   { background: rgba(140,122,99,0.12); color: var(--ink3); }
+
+/* 季節選択グリッド */
+.season-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+.season-chip {
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 6px 4px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  color: var(--ink2);
+  line-height: 1.3;
+}
+.season-chip:hover { border-color: var(--gold); color: var(--gold); }
+.season-chip.selected { font-weight: 600; }
+.season-chip.sel-spring { background: rgba(220,170,180,0.2); border-color: #a05070; color: #a05070; }
+.season-chip.sel-summer { background: rgba(60,140,100,0.15); border-color: #1a7a50; color: #1a7a50; }
+.season-chip.sel-autumn { background: rgba(180,120,40,0.18); border-color: #8a5a10; color: #8a5a10; }
+.season-chip.sel-winter { background: rgba(80,120,180,0.15); border-color: #2a5090; color: #2a5090; }
+.season-chip.sel-new    { background: rgba(180,146,42,0.18); border-color: #8a6010; color: #8a6010; }
+.season-chip.sel-none   { background: rgba(140,122,99,0.12); border-color: var(--ink3); color: var(--ink3); }
 
 /* アクションボタン */
 .col-actions {
@@ -633,6 +681,10 @@ mark { background: rgba(184,146,42,0.32); color: var(--ink); border-radius: 2px;
         <label>備考・鑑賞（任意）</label>
         <textarea id="haikuNote" placeholder="季語・背景など" rows="2"></textarea>
       </div>
+      <div class="mfield">
+        <label>季節</label>
+        <div class="season-grid" id="seasonGrid"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="mbtn danger" id="haikuDel" style="margin-right:auto;display:none">削除</button>
@@ -704,6 +756,44 @@ let editingId = null;
 let searchQuery = '';
 let sortOrder = [];
 let sortDragSrc = null;
+let selectedSeason = '';
+
+// 季節データ
+const SEASONS = [
+  { key: '三春',   cls: 'spring' }, { key: '初春', cls: 'spring' },
+  { key: '仲春',   cls: 'spring' }, { key: '晩春', cls: 'spring' },
+  { key: '三夏',   cls: 'summer' }, { key: '初夏', cls: 'summer' },
+  { key: '仲夏',   cls: 'summer' }, { key: '晩夏', cls: 'summer' },
+  { key: '三秋',   cls: 'autumn' }, { key: '初秋', cls: 'autumn' },
+  { key: '仲秋',   cls: 'autumn' }, { key: '晩秋', cls: 'autumn' },
+  { key: '三冬',   cls: 'winter' }, { key: '初冬', cls: 'winter' },
+  { key: '仲冬',   cls: 'winter' }, { key: '晩冬', cls: 'winter' },
+  { key: '全新年', cls: 'new'    }, { key: '上新年', cls: 'new' },
+  { key: '中新年', cls: 'new'    }, { key: '下新年', cls: 'new' },
+  { key: '無季',   cls: 'none'   },
+];
+
+function seasonCls(key) {
+  const s = SEASONS.find(s => s.key === key);
+  return s ? `season-${s.cls}` : '';
+}
+
+function renderSeasonGrid(current) {
+  const grid = document.getElementById('seasonGrid');
+  grid.innerHTML = SEASONS.map(s => {
+    const isSel = current === s.key;
+    const selCls = isSel ? ` selected sel-${s.cls}` : '';
+    return `<button type="button" class="season-chip${selCls}" data-season="${s.key}">${s.key}</button>`;
+  }).join('');
+
+  grid.querySelectorAll('.season-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.season;
+      selectedSeason = selectedSeason === val ? '' : val; // 同じものを押したら解除
+      renderSeasonGrid(selectedSeason);
+    });
+  });
+}
 
 function genId() {
   return 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
@@ -815,12 +905,18 @@ function makeHaikuCol(e, num, q) {
   const col = document.createElement('div');
   col.className = 'col-haiku';
   col.dataset.id = e.id;
+  const seasonHtml = e.season
+    ? `<div class="season-tag ${seasonCls(e.season)}">${escHtml(e.season)}</div>`
+    : '';
   col.innerHTML = `
     <div class="haiku-body">
       <div class="haiku-text-v">${highlight(e.text || '', q)}</div>
       ${e.note ? `<div class="haiku-note-v">${highlight(e.note, q)}</div>` : ''}
     </div>
-    <div class="col-bottom"><div class="h-num">${num}</div></div>
+    <div class="col-bottom">
+      ${seasonHtml}
+      <div class="h-num">${num}</div>
+    </div>
     <div class="col-actions">
       <button class="act-btn" data-edit="${e.id}">✎ 編集</button>
       <button class="act-btn del" data-del="${e.id}">✕ 削除</button>
@@ -857,6 +953,8 @@ function openAddHaiku() {
   document.getElementById('haikuText').value = '';
   document.getElementById('haikuNote').value = '';
   document.getElementById('haikuDel').style.display = 'none';
+  selectedSeason = '';
+  renderSeasonGrid('');
   openOverlay('haikuModal');
   setTimeout(() => document.getElementById('haikuText').focus(), 320);
 }
@@ -870,6 +968,8 @@ function openEdit(id) {
     document.getElementById('haikuText').value = e.text || '';
     document.getElementById('haikuNote').value = e.note || '';
     document.getElementById('haikuDel').style.display = 'inline-block';
+    selectedSeason = e.season || '';
+    renderSeasonGrid(selectedSeason);
     openOverlay('haikuModal');
     setTimeout(() => document.getElementById('haikuText').focus(), 320);
   } else {
@@ -888,9 +988,9 @@ function saveHaiku() {
   const isNew = !editingId;
   if (editingId) {
     const e = book.entries.find(e => e.id === editingId);
-    if (e) { e.text = text; e.note = note; }
+    if (e) { e.text = text; e.note = note; e.season = selectedSeason; }
   } else {
-    book.entries.push({ id: genId(), type: 'haiku', text, note });
+    book.entries.push({ id: genId(), type: 'haiku', text, note, season: selectedSeason });
   }
   saveData(); render();
   closeOverlay('haikuModal');
