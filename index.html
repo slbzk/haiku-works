@@ -2,23 +2,24 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>句集エディタ</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700;800&family=Noto+Serif+JP:wght@300;400;500&display=swap');
 
 :root {
-  --bg:       #f7f3ec;
-  --paper:    #fdfaf4;
-  --ink:      #1c160e;
-  --ink2:     #4a3f2f;
-  --ink3:     #8c7a63;
-  --rule:     #d6cfc2;
-  --gold:     #b8922a;
-  --gold2:    #e8c96a;
-  --red:      #9b2217;
-  --chapter:  #2c4a3e;
-  --shadow:   rgba(28,22,14,0.10);
+  --bg:      #1c160e;
+  --paper:   #fdfaf4;
+  --paper2:  #f5f0e6;
+  --ink:     #1c160e;
+  --ink2:    #4a3f2f;
+  --ink3:    #8c7a63;
+  --rule:    #d6cfc2;
+  --gold:    #b8922a;
+  --gold2:   #e8c96a;
+  --red:     #9b2217;
+  --chapter: #2c4a3e;
+  --shadow:  rgba(28,22,14,0.12);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,439 +27,421 @@
 body {
   background: var(--bg);
   font-family: 'Noto Serif JP', serif;
-  min-height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   color: var(--ink);
 }
 
-/* ========== レイアウト ========== */
-.layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  grid-template-rows: 56px 1fr;
-  min-height: 100vh;
-}
-
-/* ========== ヘッダー ========== */
+/* ===== ヘッダー ===== */
 .topbar {
-  grid-column: 1 / -1;
+  flex-shrink: 0;
   background: var(--ink);
+  border-bottom: 2px solid var(--gold);
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  gap: 16px;
-  border-bottom: 2px solid var(--gold);
-  position: sticky;
-  top: 0;
-  z-index: 200;
+  padding: 0 12px;
+  gap: 8px;
+  height: 50px;
+  z-index: 100;
 }
 
 .logo {
   font-family: 'Shippori Mincho B1', serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--gold);
-  letter-spacing: 0.25em;
-  flex-shrink: 0;
-}
-
-.logo span {
-  font-size: 10px;
-  color: var(--gold2);
   letter-spacing: 0.2em;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+.logo small {
   display: block;
+  font-size: 8px;
+  color: var(--gold2);
+  letter-spacing: 0.18em;
   font-weight: 400;
 }
 
 .search-wrap {
   flex: 1;
-  max-width: 320px;
   display: flex;
   align-items: center;
   background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 4px;
-  padding: 0 10px;
-  gap: 6px;
+  padding: 0 8px;
+  gap: 5px;
+  height: 32px;
+  max-width: 220px;
 }
-
 .search-wrap input {
-  background: none;
-  border: none;
-  outline: none;
-  color: #fff;
-  font-family: 'Noto Serif JP', serif;
-  font-size: 13px;
-  width: 100%;
-  padding: 7px 0;
+  background: none; border: none; outline: none;
+  color: #fff; font-family: 'Noto Serif JP', serif;
+  font-size: 13px; width: 100%;
 }
-
-.search-wrap input::placeholder { color: rgba(255,255,255,0.3); }
-.search-icon { color: rgba(255,255,255,0.4); font-size: 13px; }
-
-.search-clear-btn {
-  background: none; border: none; color: rgba(255,255,255,0.4);
-  cursor: pointer; font-size: 14px; padding: 0; display: none;
+.search-wrap input::placeholder { color: rgba(255,255,255,0.28); }
+.s-icon { font-size: 11px; color: rgba(255,255,255,0.35); flex-shrink:0; }
+.s-clear {
+  background: none; border: none; color: rgba(255,255,255,0.35);
+  cursor: pointer; font-size: 13px; padding: 0; display: none; flex-shrink:0;
 }
-.search-clear-btn.show { display: block; }
+.s-clear.show { display: block; }
 
-.topbar-actions {
+.topbar-right {
   display: flex;
-  gap: 8px;
+  gap: 5px;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .tbtn {
   background: none;
-  border: 1px solid rgba(184,146,42,0.5);
+  border: 1px solid rgba(184,146,42,0.4);
   color: var(--gold2);
-  padding: 5px 12px;
+  padding: 4px 9px;
   font-family: 'Noto Serif JP', serif;
   font-size: 11px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   cursor: pointer;
   border-radius: 3px;
-  transition: all 0.2s;
+  transition: all 0.18s;
   white-space: nowrap;
 }
-.tbtn:hover { background: var(--gold); color: var(--ink); border-color: var(--gold); }
-.tbtn.primary { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 600; }
-.tbtn.primary:hover { background: var(--gold2); }
+.tbtn:hover, .tbtn:active { background: var(--gold); color: var(--ink); border-color: var(--gold); }
 
-/* ========== サイドバー ========== */
-.sidebar {
-  background: var(--paper);
-  border-right: 1px solid var(--rule);
-  overflow-y: auto;
-  padding: 16px 0 80px;
-  position: sticky;
-  top: 56px;
-  height: calc(100vh - 56px);
-}
-
-.sidebar-section {
-  padding: 0 14px;
-  margin-bottom: 20px;
-}
-
-.sidebar-label {
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  color: var(--ink3);
-  margin-bottom: 8px;
-  padding: 0 2px;
-  text-transform: uppercase;
-}
-
-.meta-field {
-  margin-bottom: 8px;
-}
-
-.meta-field label {
-  display: block;
-  font-size: 10px;
-  color: var(--ink3);
-  letter-spacing: 0.1em;
-  margin-bottom: 3px;
-}
-
-.meta-field input {
-  width: 100%;
-  background: white;
-  border: 1px solid var(--rule);
-  border-radius: 3px;
-  padding: 6px 8px;
-  font-family: 'Noto Serif JP', serif;
-  font-size: 13px;
-  color: var(--ink);
-  outline: none;
-  transition: border-color 0.2s;
-}
-.meta-field input:focus { border-color: var(--gold); }
-
-.sidebar-divider {
-  border: none;
-  border-top: 1px solid var(--rule);
-  margin: 14px 0;
-}
-
-/* 目次 */
-.toc-title {
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  color: var(--ink3);
-  padding: 0 14px;
-  margin-bottom: 6px;
-}
-
-.toc-list {
-  list-style: none;
-  padding: 0 6px;
-}
-
-.toc-item {
-  padding: 4px 8px;
-  cursor: pointer;
-  border-radius: 3px;
-  transition: background 0.15s;
+/* ===== 書誌バー ===== */
+.bookinfo-bar {
+  flex-shrink: 0;
+  background: var(--paper2);
+  border-bottom: 1px solid var(--rule);
   display: flex;
-  align-items: baseline;
-  gap: 6px;
-  line-height: 1.5;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  height: 38px;
+  overflow: hidden;
 }
-.toc-item:hover { background: rgba(184,146,42,0.08); }
-.toc-item.chapter { color: var(--chapter); font-size: 12px; font-weight: 500; letter-spacing: 0.1em; }
-.toc-item.haiku { color: var(--ink2); font-size: 11px; padding-left: 20px; }
-.toc-num { font-size: 10px; color: var(--ink3); flex-shrink: 0; }
+.bi-label { font-size: 10px; color: var(--ink3); letter-spacing: 0.1em; flex-shrink:0; }
+.bi-input {
+  background: none; border: none; outline: none;
+  font-family: 'Shippori Mincho B1', serif;
+  font-size: 14px; color: var(--ink);
+  letter-spacing: 0.12em;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+  min-width: 40px; max-width: 180px;
+}
+.bi-input:focus { border-bottom-color: var(--gold); }
+.bi-sep { color: var(--rule); flex-shrink:0; font-size: 12px; }
 
-/* 追加ボタン群 */
-.add-btns {
-  padding: 0 14px;
+/* ===== スクロールエリア ===== */
+.scroll-area-wrap {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.add-btn {
-  background: none;
-  border: 1px dashed var(--rule);
-  color: var(--ink3);
-  padding: 7px 10px;
-  font-family: 'Noto Serif JP', serif;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  border-radius: 4px;
-  text-align: left;
-  transition: all 0.2s;
-}
-.add-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(184,146,42,0.05); }
-.add-btn.chapter-btn { color: var(--chapter); border-color: rgba(44,74,62,0.3); }
-.add-btn.chapter-btn:hover { background: rgba(44,74,62,0.06); border-color: var(--chapter); }
-
-/* ========== メインエリア ========== */
-.main {
-  padding: 32px 40px 120px;
-  overflow-y: auto;
-  height: calc(100vh - 56px);
-}
-
-/* 句集タイトルブロック */
-.book-header {
-  text-align: center;
-  margin-bottom: 48px;
-  padding-bottom: 32px;
-  border-bottom: 2px solid var(--rule);
+  overflow: hidden;
   position: relative;
 }
 
-.book-title-display {
+.scroll-hint {
+  flex-shrink: 0;
+  background: var(--paper);
+  padding: 3px 12px;
+  font-size: 10px;
+  color: var(--ink3);
+  letter-spacing: 0.1em;
+  text-align: right;
+  border-bottom: 1px solid var(--rule);
+}
+
+.search-banner {
+  position: absolute;
+  top: 30px; left: 50%; transform: translateX(-50%);
+  background: rgba(184,146,42,0.15);
+  border: 1px solid rgba(184,146,42,0.4);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 11px; color: var(--gold);
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  display: none;
+  z-index: 50;
+  white-space: nowrap;
+}
+.search-banner.show { display: block; }
+
+.scroll-outer {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
+  background: var(--paper);
+}
+.scroll-outer::-webkit-scrollbar { height: 5px; }
+.scroll-outer::-webkit-scrollbar-track { background: var(--paper2); }
+.scroll-outer::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+
+/* 右から左へ並ぶ */
+.scroll-inner {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: stretch;
+  height: 100%;
+  min-width: max-content;
+  padding-right: 16px;
+  padding-left: 40px;
+}
+
+/* ===== タイトルページ（右端=巻末） ===== */
+.title-page {
+  flex-shrink: 0;
+  width: 140px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 2px solid var(--gold);
+  padding: 20px 10px;
+  gap: 14px;
+}
+.tp-title {
+  writing-mode: vertical-rl;
   font-family: 'Shippori Mincho B1', serif;
-  font-size: 36px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.3em;
   color: var(--ink);
-  margin-bottom: 10px;
-  min-height: 50px;
+  line-height: 1.6;
 }
-
-.book-author-display {
-  font-family: 'Shippori Mincho B1', serif;
-  font-size: 16px;
-  letter-spacing: 0.4em;
-  color: var(--ink2);
-  min-height: 24px;
-}
-
-.book-header::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 2px;
-  background: var(--gold);
-}
-
-/* エントリーリスト */
-.entries {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-/* 章ブロック */
-.entry-chapter {
-  position: relative;
-  margin: 32px 0 20px;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, rgba(44,74,62,0.06), rgba(44,74,62,0.02));
-  border-left: 3px solid var(--chapter);
-  border-radius: 0 4px 4px 0;
-  cursor: default;
-}
-
-.chapter-name {
-  font-family: 'Shippori Mincho B1', serif;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: 0.3em;
-  color: var(--chapter);
-}
-
-.chapter-num {
-  font-size: 10px;
-  color: rgba(44,74,62,0.6);
-  letter-spacing: 0.15em;
-  margin-bottom: 4px;
-}
-
-/* 句ブロック */
-.entry-haiku {
-  position: relative;
-  padding: 20px 24px 20px;
-  border-bottom: 1px solid var(--rule);
-  cursor: default;
-  transition: background 0.15s;
-  display: flex;
-  align-items: flex-start;
-  gap: 24px;
-}
-
-.entry-haiku:hover { background: rgba(184,146,42,0.03); }
-
-.haiku-num {
-  font-size: 10px;
-  color: var(--ink3);
-  letter-spacing: 0.1em;
-  flex-shrink: 0;
-  padding-top: 4px;
-  min-width: 28px;
-}
-
-.haiku-text-vertical {
+.tp-author {
   writing-mode: vertical-rl;
   font-family: 'Shippori Mincho B1', serif;
-  font-size: 22px;
-  line-height: 2;
-  letter-spacing: 0.2em;
-  color: var(--ink);
-  flex-shrink: 0;
-  min-height: 60px;
-}
-
-.haiku-note {
-  font-size: 12px;
+  font-size: 13px;
+  letter-spacing: 0.3em;
   color: var(--ink3);
-  line-height: 1.8;
-  letter-spacing: 0.05em;
-  align-self: center;
+}
+.tp-placeholder {
+  writing-mode: vertical-rl;
+  font-size: 11px;
+  color: var(--rule);
+  letter-spacing: 0.2em;
 }
 
-/* ハイライト */
-mark { background: rgba(184,146,42,0.3); color: var(--ink); border-radius: 2px; }
-
-/* エントリーのアクションボタン */
-.entry-actions {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+/* ===== 章カラム ===== */
+.col-chapter {
+  flex-shrink: 0;
+  width: 68px;
+  height: 100%;
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--rule);
+  border-left: 3px solid var(--chapter);
+  background: linear-gradient(180deg, rgba(44,74,62,0.05), rgba(44,74,62,0.02));
+  position: relative;
+  gap: 10px;
+  padding: 16px 4px;
+}
+.ch-num {
+  writing-mode: vertical-rl;
+  font-size: 9px;
+  color: rgba(44,74,62,0.55);
+  letter-spacing: 0.15em;
+}
+.ch-name {
+  writing-mode: vertical-rl;
+  font-family: 'Shippori Mincho B1', serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  color: var(--chapter);
+  line-height: 1.8;
+}
+
+/* ===== 句カラム ===== */
+.col-haiku {
+  flex-shrink: 0;
+  width: 86px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid var(--rule);
+  position: relative;
+  transition: background 0.15s;
+}
+.col-haiku:hover { background: rgba(184,146,42,0.04); }
+
+.haiku-body {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 6px 8px;
+  overflow: hidden;
+}
+.haiku-text-v {
+  writing-mode: vertical-rl;
+  font-family: 'Shippori Mincho B1', serif;
+  font-size: 18px;
+  line-height: 2;
+  letter-spacing: 0.18em;
+  color: var(--ink);
+  flex: 1;
+  overflow: hidden;
+  word-break: break-all;
+}
+.haiku-note-v {
+  writing-mode: vertical-rl;
+  font-size: 9px;
+  color: var(--ink3);
+  letter-spacing: 0.1em;
+  line-height: 1.6;
+  margin-top: 6px;
+  max-height: 70px;
+  overflow: hidden;
+}
+.col-bottom {
+  width: 100%;
+  border-top: 1px solid var(--rule);
+  padding: 5px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.h-num { font-size: 9px; color: var(--ink3); }
+
+/* アクションボタン */
+.col-actions {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 10;
+  /* PC: ホバー時のみ表示 */
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.15s;
 }
+@media (hover: hover) {
+  .col-haiku:hover .col-actions,
+  .col-chapter:hover .col-actions { opacity: 1; pointer-events: all; }
+}
+/* タッチデバイス: 常時表示 */
+@media (hover: none) {
+  .col-actions { opacity: 1; pointer-events: all; position: relative; bottom: auto; left: auto; transform: none; padding: 4px 0 6px; }
+}
 
-.entry-chapter:hover .entry-actions,
-.entry-haiku:hover .entry-actions { opacity: 1; }
-
-.eact {
+.act-btn {
   background: white;
   border: 1px solid var(--rule);
   color: var(--ink3);
-  width: 28px;
-  height: 28px;
+  font-size: 10px;
+  padding: 3px 6px;
   border-radius: 3px;
   cursor: pointer;
-  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px var(--shadow);
+  transition: all 0.15s;
+  font-family: 'Noto Serif JP', serif;
+  letter-spacing: 0.04em;
+}
+.act-btn:hover, .act-btn:active { border-color: var(--gold); color: var(--gold); }
+.act-btn.del:hover, .act-btn.del:active { border-color: var(--red); color: var(--red); }
+
+/* 空状態 */
+.empty-col {
+  flex-shrink: 0;
+  width: 180px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.empty-big {
+  writing-mode: vertical-rl;
+  font-family: 'Shippori Mincho B1', serif;
+  font-size: 48px;
+  letter-spacing: 0.3em;
+  color: var(--rule);
+}
+.empty-msg {
+  writing-mode: vertical-rl;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--ink3);
+  line-height: 1.8;
+}
+
+/* ハイライト */
+mark { background: rgba(184,146,42,0.32); color: var(--ink); border-radius: 2px; }
+
+/* ===== ボトムバー ===== */
+.bottombar {
+  flex-shrink: 0;
+  background: var(--ink);
+  border-top: 1px solid rgba(184,146,42,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
-  box-shadow: 0 1px 3px var(--shadow);
+  gap: 10px;
+  padding: 8px 12px;
+  height: 54px;
 }
-.eact:hover { border-color: var(--gold); color: var(--gold); }
-.eact.danger:hover { border-color: var(--red); color: var(--red); }
-.eact.move { cursor: grab; }
-
-/* ドラッグ中 */
-.dragging { opacity: 0.4; }
-.drag-over-top::before {
-  content: '';
-  display: block;
-  height: 3px;
-  background: var(--gold);
-  border-radius: 2px;
-  margin-bottom: 2px;
-}
-.drag-over-bottom::after {
-  content: '';
-  display: block;
-  height: 3px;
-  background: var(--gold);
-  border-radius: 2px;
-  margin-top: 2px;
-}
-
-/* 検索ヒット件数 */
-.search-result-bar {
-  background: rgba(184,146,42,0.1);
-  border: 1px solid rgba(184,146,42,0.3);
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 12px;
-  color: var(--gold);
+.bbbtn {
+  flex: 1;
+  max-width: 200px;
+  background: none;
+  border: 1px dashed rgba(184,146,42,0.45);
+  color: var(--gold2);
+  padding: 8px 10px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 13px;
   letter-spacing: 0.1em;
-  margin-bottom: 20px;
-  display: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.18s;
 }
-.search-result-bar.show { display: block; }
+.bbbtn:hover, .bbbtn:active { background: rgba(184,146,42,0.1); border-color: var(--gold); color: var(--gold); }
+.bbbtn.ch { color: rgba(100,160,130,0.9); border-color: rgba(44,74,62,0.4); }
+.bbbtn.ch:hover, .bbbtn.ch:active { background: rgba(44,74,62,0.1); border-color: var(--chapter); color: var(--chapter); }
 
-/* 空状態 */
-.empty-state {
-  text-align: center;
-  padding: 80px 20px;
-  color: var(--ink3);
-}
-.empty-state .big { font-family: 'Shippori Mincho B1', serif; font-size: 48px; color: var(--rule); display: block; margin-bottom: 16px; letter-spacing: 0.3em; }
-.empty-state p { font-size: 13px; line-height: 2.2; letter-spacing: 0.1em; }
-
-/* ========== モーダル ========== */
+/* ===== モーダル ===== */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(28,22,14,0.65);
-  z-index: 400;
+  background: rgba(28,22,14,0.6);
+  z-index: 300;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s;
+  transition: opacity 0.22s;
 }
 .overlay.open { opacity: 1; pointer-events: all; }
 
 .modal {
   background: var(--paper);
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 14px 14px 0 0;
+  max-height: 92dvh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  transform: translateY(16px);
-  transition: transform 0.25s;
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
 }
 .overlay.open .modal { transform: translateY(0); }
 
@@ -466,8 +449,12 @@ mark { background: rgba(184,146,42,0.3); color: var(--ink); border-radius: 2px; 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px 16px;
+  padding: 16px 20px 12px;
   border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  z-index: 10;
 }
 .modal-title {
   font-family: 'Shippori Mincho B1', serif;
@@ -477,14 +464,17 @@ mark { background: rgba(184,146,42,0.3); color: var(--ink); border-radius: 2px; 
 }
 .modal-close {
   background: none; border: none; font-size: 20px;
-  color: var(--ink3); cursor: pointer; line-height: 1;
+  color: var(--ink3); cursor: pointer; padding: 4px; line-height: 1;
 }
 
-.modal-body { padding: 20px 24px; }
+.modal-body { padding: 14px 20px; }
 
-.mfield { margin-bottom: 14px; }
-.mfield label { display: block; font-size: 11px; color: var(--ink3); letter-spacing: 0.12em; margin-bottom: 5px; }
-
+.mfield { margin-bottom: 12px; }
+.mfield label {
+  display: block;
+  font-size: 11px; color: var(--ink3);
+  letter-spacing: 0.1em; margin-bottom: 4px;
+}
 .mfield input, .mfield textarea {
   width: 100%;
   background: white;
@@ -492,168 +482,143 @@ mark { background: rgba(184,146,42,0.3); color: var(--ink); border-radius: 2px; 
   border-radius: 4px;
   padding: 9px 12px;
   font-family: 'Noto Serif JP', serif;
-  font-size: 14px;
-  color: var(--ink);
+  font-size: 15px; color: var(--ink);
   outline: none;
   transition: border-color 0.2s;
+  -webkit-appearance: none;
 }
 .mfield input:focus, .mfield textarea:focus { border-color: var(--gold); }
-.mfield textarea { resize: vertical; min-height: 60px; line-height: 1.8; }
+.mfield textarea { resize: vertical; min-height: 52px; line-height: 1.8; }
 
-/* 縦書き入力 */
-.vertical-input-area {
+.v-input-wrap {
   background: white;
   border: 1px solid var(--rule);
   border-radius: 4px;
-  padding: 16px;
-  margin-bottom: 14px;
-  min-height: 140px;
+  padding: 12px;
+  margin-bottom: 12px;
+  min-height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
 }
-.vertical-input-area::before {
+.v-input-wrap::before {
   content: '';
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background: repeating-linear-gradient(90deg, transparent, transparent calc(33.3% - 1px), rgba(214,207,194,0.4) calc(33.3% - 1px), rgba(214,207,194,0.4) 33.3%);
   pointer-events: none;
 }
-.vertical-input-area textarea {
+.v-input-wrap textarea {
   writing-mode: vertical-rl;
   font-family: 'Shippori Mincho B1', serif;
-  font-size: 20px;
-  line-height: 2;
+  font-size: 20px; line-height: 2;
   letter-spacing: 0.2em;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: var(--ink);
-  resize: none;
-  min-height: 110px;
-  width: 100%;
+  border: none; outline: none;
+  background: transparent; color: var(--ink);
+  resize: none; min-height: 90px; width: 100%;
+  -webkit-appearance: none;
 }
-.vertical-input-area textarea::placeholder { color: var(--rule); }
+.v-input-wrap textarea::placeholder { color: var(--rule); }
 
 .modal-footer {
-  padding: 14px 24px 20px;
+  padding: 12px 20px 16px;
   display: flex;
   gap: 8px;
   justify-content: flex-end;
   border-top: 1px solid var(--rule);
 }
-
 .mbtn {
   background: none;
   border: 1px solid var(--rule);
   color: var(--ink2);
-  padding: 8px 20px;
+  padding: 9px 18px;
   font-family: 'Noto Serif JP', serif;
-  font-size: 13px;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
+  font-size: 13px; letter-spacing: 0.1em;
+  cursor: pointer; border-radius: 4px;
+  transition: all 0.18s;
+  -webkit-appearance: none;
 }
 .mbtn:hover { border-color: var(--ink2); }
 .mbtn.primary { background: var(--ink); color: var(--gold); border-color: var(--ink); }
 .mbtn.primary:hover { background: var(--ink2); }
-.mbtn.danger { color: var(--red); border-color: rgba(155,34,23,0.4); }
-.mbtn.danger:hover { background: var(--red); color: white; border-color: var(--red); }
+.mbtn.danger { color: var(--red); border-color: rgba(155,34,23,0.35); }
+.mbtn.danger:hover, .mbtn.danger:active { background: var(--red); color: white; border-color: var(--red); }
 
-/* 目次モーダル */
-.toc-modal-list { list-style: none; }
-.toc-modal-item {
-  padding: 8px 0;
-  border-bottom: 1px solid var(--rule);
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
+/* 目次 */
+.toc-meta { font-family: 'Shippori Mincho B1', serif; font-size: 13px; text-align: center; color: var(--ink3); letter-spacing: 0.2em; margin-bottom: 12px; }
+.toc-list-m { list-style: none; }
+.toc-list-m li {
+  padding: 7px 0; border-bottom: 1px solid var(--rule);
+  display: flex; align-items: baseline; gap: 10px;
   font-family: 'Noto Serif JP', serif;
 }
-.toc-modal-item.ch {
-  font-family: 'Shippori Mincho B1', serif;
-  font-size: 15px;
-  color: var(--chapter);
-  letter-spacing: 0.15em;
-  padding-top: 16px;
-}
-.toc-modal-item.hk { font-size: 13px; color: var(--ink2); padding-left: 16px; }
-.toc-modal-num { font-size: 11px; color: var(--ink3); flex-shrink: 0; min-width: 30px; }
+.toc-list-m li.ch { font-family: 'Shippori Mincho B1', serif; font-size: 14px; color: var(--chapter); letter-spacing: 0.12em; padding-top: 14px; }
+.toc-list-m li.hk { font-size: 13px; color: var(--ink2); padding-left: 12px; }
+.toc-num-m { font-size: 10px; color: var(--ink3); flex-shrink: 0; min-width: 26px; }
 
-/* レスポンシブ */
-@media (max-width: 640px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
-  .main { padding: 20px 16px 80px; }
-  .topbar { gap: 8px; }
-  .search-wrap { max-width: 160px; }
+/* 並び替え */
+.sort-list { list-style: none; }
+.sort-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 8px; border-bottom: 1px solid var(--rule);
+  border-radius: 4px; cursor: grab; transition: background 0.12s;
+  touch-action: none; user-select: none;
 }
+.sort-item.dragging-sort { opacity: 0.4; }
+.sort-item.over-sort { background: rgba(184,146,42,0.1); outline: 1px solid var(--gold); }
+.sort-handle { color: var(--ink3); font-size: 18px; flex-shrink: 0; }
+.sort-label { font-family: 'Noto Serif JP', serif; font-size: 13px; color: var(--ink2); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sort-label.ch { color: var(--chapter); font-weight: 500; }
+.sort-badge { font-size: 10px; padding: 1px 6px; border-radius: 10px; flex-shrink: 0; }
+.sort-badge.hbadge { background: rgba(184,146,42,0.12); color: var(--gold); }
+.sort-badge.cbadge { background: rgba(44,74,62,0.1); color: var(--chapter); }
 </style>
 </head>
 <body>
 
-<div class="layout">
+<header class="topbar">
+  <div class="logo">句集<small>EDITOR</small></div>
+  <div class="search-wrap">
+    <span class="s-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="検索...">
+    <button class="s-clear" id="sClear">✕</button>
+  </div>
+  <div class="topbar-right">
+    <button class="tbtn" id="btnSort">並替</button>
+    <button class="tbtn" id="btnToc">目次</button>
+    <button class="tbtn" id="btnExport">📤</button>
+    <button class="tbtn" id="btnImport">📥</button>
+  </div>
+</header>
 
-  <!-- ヘッダー -->
-  <header class="topbar">
-    <div class="logo">句集<span>KUUSHU EDITOR</span></div>
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="句・備考を検索...">
-      <button class="search-clear-btn" id="searchClearBtn">✕</button>
-    </div>
-    <div class="topbar-actions">
-      <button class="tbtn" id="btnToc">目次</button>
-      <button class="tbtn" id="btnExport">📤 保存</button>
-      <button class="tbtn" id="btnImport">📥 読込</button>
-    </div>
-  </header>
-
-  <!-- サイドバー -->
-  <aside class="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">句集の情報</div>
-      <div class="meta-field">
-        <label>タイトル</label>
-        <input type="text" id="sideTitle" placeholder="句集のタイトル">
-      </div>
-      <div class="meta-field">
-        <label>作者名</label>
-        <input type="text" id="sideAuthor" placeholder="作者名">
-      </div>
-    </div>
-
-    <hr class="sidebar-divider">
-
-    <div class="add-btns">
-      <div class="sidebar-label">追加</div>
-      <button class="add-btn" id="btnAddHaiku">＋ 句を追加</button>
-      <button class="add-btn chapter-btn" id="btnAddChapter">＋ 章を追加</button>
-    </div>
-
-    <hr class="sidebar-divider">
-
-    <div class="toc-title">目次</div>
-    <ul class="toc-list" id="tocList"></ul>
-  </aside>
-
-  <!-- メイン -->
-  <main class="main">
-    <div class="book-header">
-      <div class="book-title-display" id="displayTitle">（タイトル未設定）</div>
-      <div class="book-author-display" id="displayAuthor"></div>
-    </div>
-
-    <div class="search-result-bar" id="searchResultBar"></div>
-    <div class="entries" id="entries"></div>
-  </main>
-
+<div class="bookinfo-bar">
+  <span class="bi-label">題</span>
+  <input class="bi-input" id="biTitle" placeholder="タイトル">
+  <span class="bi-sep">｜</span>
+  <span class="bi-label">著</span>
+  <input class="bi-input" id="biAuthor" placeholder="作者名">
 </div>
 
-<!-- 句編集モーダル -->
+<div class="scroll-area-wrap">
+  <div class="scroll-hint">← スワイプして閲覧</div>
+  <div class="search-banner" id="searchBanner"></div>
+  <div class="scroll-outer" id="scrollOuter">
+    <div class="scroll-inner" id="scrollInner">
+      <div class="title-page" id="titlePage">
+        <div class="tp-title" id="tpTitle"><span class="tp-placeholder">句集</span></div>
+        <div class="tp-author" id="tpAuthor"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottombar">
+  <button class="bbbtn" id="btnAddHaiku">＋ 句を追加</button>
+  <button class="bbbtn ch" id="btnAddChapter">＋ 章を追加</button>
+</div>
+
+<!-- 句モーダル -->
 <div class="overlay" id="haikuModal">
   <div class="modal">
     <div class="modal-header">
@@ -661,23 +626,23 @@ mark { background: rgba(184,146,42,0.3); color: var(--ink); border-radius: 2px; 
       <button class="modal-close" id="haikuModalClose">✕</button>
     </div>
     <div class="modal-body">
-      <div class="vertical-input-area">
-        <textarea id="haikuTextInput" placeholder="古池や　蛙飛び込む　水の音" rows="3"></textarea>
+      <div class="v-input-wrap">
+        <textarea id="haikuText" placeholder="古池や　蛙飛び込む　水の音" rows="3"></textarea>
       </div>
       <div class="mfield">
         <label>備考・鑑賞（任意）</label>
-        <textarea id="haikuNoteInput" placeholder="季語・背景など" rows="2"></textarea>
+        <textarea id="haikuNote" placeholder="季語・背景など" rows="2"></textarea>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="mbtn danger" id="haikuDeleteBtn" style="margin-right:auto;display:none">削除</button>
-      <button class="mbtn" id="haikuCancelBtn">キャンセル</button>
-      <button class="mbtn primary" id="haikuSaveBtn">保　存</button>
+      <button class="mbtn danger" id="haikuDel" style="margin-right:auto;display:none">削除</button>
+      <button class="mbtn" id="haikuCancel">キャンセル</button>
+      <button class="mbtn primary" id="haikuSave">保　存</button>
     </div>
   </div>
 </div>
 
-<!-- 章編集モーダル -->
+<!-- 章モーダル -->
 <div class="overlay" id="chapterModal">
   <div class="modal">
     <div class="modal-header">
@@ -687,27 +652,45 @@ mark { background: rgba(184,146,42,0.3); color: var(--ink); border-radius: 2px; 
     <div class="modal-body">
       <div class="mfield">
         <label>章の名前</label>
-        <input type="text" id="chapterNameInput" placeholder="第一章　春の章">
+        <input type="text" id="chapterName" placeholder="第一章　春の章">
       </div>
     </div>
     <div class="modal-footer">
-      <button class="mbtn danger" id="chapterDeleteBtn" style="margin-right:auto;display:none">削除</button>
-      <button class="mbtn" id="chapterCancelBtn">キャンセル</button>
-      <button class="mbtn primary" id="chapterSaveBtn">保　存</button>
+      <button class="mbtn danger" id="chapterDel" style="margin-right:auto;display:none">削除</button>
+      <button class="mbtn" id="chapterCancel">キャンセル</button>
+      <button class="mbtn primary" id="chapterSave">保　存</button>
     </div>
   </div>
 </div>
 
 <!-- 目次モーダル -->
 <div class="overlay" id="tocModal">
-  <div class="modal" style="max-width:400px">
+  <div class="modal" style="max-width:420px">
     <div class="modal-header">
       <span class="modal-title">目　次</span>
-      <button class="modal-close" id="tocModalClose">✕</button>
+      <button class="modal-close" id="tocClose">✕</button>
     </div>
     <div class="modal-body">
-      <div style="font-family:'Shippori Mincho B1',serif;font-size:13px;text-align:center;color:var(--ink3);letter-spacing:0.2em;margin-bottom:16px" id="tocBookMeta"></div>
-      <ul class="toc-modal-list" id="tocModalList"></ul>
+      <div class="toc-meta" id="tocMeta"></div>
+      <ul class="toc-list-m" id="tocList"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- 並び替えモーダル -->
+<div class="overlay" id="sortModal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <span class="modal-title">並び替え</span>
+      <button class="modal-close" id="sortClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--ink3);letter-spacing:0.1em;margin-bottom:10px">ドラッグして順番を変更</p>
+      <ul class="sort-list" id="sortList"></ul>
+    </div>
+    <div class="modal-footer">
+      <button class="mbtn" id="sortCancel">キャンセル</button>
+      <button class="mbtn primary" id="sortApply">適　用</button>
     </div>
   </div>
 </div>
@@ -715,19 +698,18 @@ mark { background: rgba(184,146,42,0.3); color: var(--ink); border-radius: 2px; 
 <input type="file" id="fileInput" accept=".json" style="display:none">
 
 <script>
-// ========== データ ==========
 const SK = 'kuushu_editor_v1';
 let book = { title: '', author: '', entries: [] };
-// entry: { id, type:'haiku'|'chapter', text?, note?, name? }
 let editingId = null;
 let searchQuery = '';
-let dragSrcId = null;
+let sortOrder = [];
+let sortDragSrc = null;
 
 function genId() {
   return 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
 }
 
-// ========== 保存・読込 ==========
+// ===== 保存・読込 =====
 function saveData() {
   try { localStorage.setItem(SK, JSON.stringify(book)); } catch(e) {}
 }
@@ -736,336 +718,346 @@ function loadData() {
   try {
     const d = localStorage.getItem(SK);
     if (d) {
-      const parsed = JSON.parse(d);
-      if (parsed && Array.isArray(parsed.entries)) {
-        book = parsed;
-      }
+      const p = JSON.parse(d);
+      if (p && Array.isArray(p.entries)) book = p;
     }
   } catch(e) { console.error('load error', e); }
   applyMeta();
   render();
 }
 
-// ========== メタ情報 ==========
+// ===== 書誌 =====
 function applyMeta() {
-  document.getElementById('sideTitle').value = book.title || '';
-  document.getElementById('sideAuthor').value = book.author || '';
-  updateDisplay();
+  document.getElementById('biTitle').value = book.title || '';
+  document.getElementById('biAuthor').value = book.author || '';
+  updateTitlePage();
 }
 
-function updateDisplay() {
-  document.getElementById('displayTitle').textContent = book.title || '（タイトル未設定）';
-  document.getElementById('displayAuthor').textContent = book.author || '';
+function updateTitlePage() {
+  const t = book.title || '';
+  const a = book.author || '';
+  document.getElementById('tpTitle').innerHTML = t
+    ? escHtml(t)
+    : '<span class="tp-placeholder">句集</span>';
+  document.getElementById('tpAuthor').textContent = a;
 }
 
-document.getElementById('sideTitle').addEventListener('input', e => {
+document.getElementById('biTitle').addEventListener('input', e => {
   book.title = e.target.value.trim();
-  updateDisplay();
-  saveData();
+  updateTitlePage(); saveData();
 });
-document.getElementById('sideAuthor').addEventListener('input', e => {
+document.getElementById('biAuthor').addEventListener('input', e => {
   book.author = e.target.value.trim();
-  updateDisplay();
-  saveData();
+  updateTitlePage(); saveData();
 });
 
-// ========== ユーティリティ ==========
+// ===== ユーティリティ =====
 function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-
 function highlight(text, q) {
   if (!q) return escHtml(text);
   const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return escHtml(text).replace(new RegExp(esc, 'gi'), m => `<mark>${m}</mark>`);
 }
 
-// ========== 描画 ==========
+// ===== 描画 =====
 function render() {
-  renderEntries();
-  renderToc();
-}
-
-function renderEntries() {
-  const container = document.getElementById('entries');
-  const resultBar = document.getElementById('searchResultBar');
+  const inner = document.getElementById('scrollInner');
+  const titlePage = document.getElementById('titlePage');
   const q = searchQuery.toLowerCase();
 
-  let entries = book.entries;
-  let haikuCount = 0;
-  let chapterCount = 0;
-
-  // 検索フィルター
-  let filtered = entries;
-  if (q) {
-    filtered = entries.filter(e => {
-      if (e.type === 'chapter') return e.name && e.name.toLowerCase().includes(q);
-      return (e.text && e.text.toLowerCase().includes(q)) ||
-             (e.note && e.note.toLowerCase().includes(q));
-    });
-    const hits = filtered.filter(e => e.type === 'haiku').length;
-    resultBar.textContent = `「${searchQuery}」の検索結果：${hits}句`;
-    resultBar.classList.add('show');
-  } else {
-    resultBar.classList.remove('show');
+  // titlePage以外を削除
+  while (inner.firstChild && inner.firstChild !== titlePage) {
+    inner.removeChild(inner.firstChild);
   }
 
-  if (filtered.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <span class="big">句</span>
-        <p>${q ? '該当する句がありません' : 'まだ句がありません\nサイドバーの「句を追加」から始めてください'}</p>
-      </div>`;
+  let entries = book.entries;
+  if (q) {
+    entries = entries.filter(e =>
+      (e.type === 'chapter' && e.name && e.name.toLowerCase().includes(q)) ||
+      (e.type === 'haiku' && (
+        (e.text && e.text.toLowerCase().includes(q)) ||
+        (e.note && e.note.toLowerCase().includes(q))
+      ))
+    );
+    const hits = entries.filter(e => e.type === 'haiku').length;
+    const banner = document.getElementById('searchBanner');
+    banner.textContent = `「${searchQuery}」 ${hits}句ヒット`;
+    banner.classList.add('show');
+  } else {
+    document.getElementById('searchBanner').classList.remove('show');
+  }
+
+  if (entries.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-col';
+    empty.innerHTML = `<div class="empty-big">句</div><div class="empty-msg">${q ? '該当なし' : '句を追加してください'}</div>`;
+    inner.insertBefore(empty, titlePage);
     return;
   }
 
-  // 句番号・章番号を付与
-  let hNum = 0;
-  let cNum = 0;
-
-  container.innerHTML = filtered.map(e => {
-    if (e.type === 'chapter') {
-      cNum++;
-      return `
-        <div class="entry-chapter" data-id="${e.id}" draggable="true">
-          <div class="chapter-num">第${cNum}章</div>
-          <div class="chapter-name">${highlight(e.name || '無題の章', q)}</div>
-          <div class="entry-actions">
-            <button class="eact move" data-drag="${e.id}" title="移動">⠿</button>
-            <button class="eact" data-edit="${e.id}" title="編集">✎</button>
-            <button class="eact danger" data-del="${e.id}" title="削除">✕</button>
-          </div>
-        </div>`;
-    } else {
-      hNum++;
-      return `
-        <div class="entry-haiku" data-id="${e.id}" draggable="true">
-          <div class="haiku-num">${hNum}</div>
-          <div class="haiku-text-vertical">${highlight(e.text || '', q)}</div>
-          ${e.note ? `<div class="haiku-note">${highlight(e.note, q)}</div>` : ''}
-          <div class="entry-actions">
-            <button class="eact move" data-drag="${e.id}" title="移動">⠿</button>
-            <button class="eact" data-edit="${e.id}" title="編集">✎</button>
-            <button class="eact danger" data-del="${e.id}" title="削除">✕</button>
-          </div>
-        </div>`;
+  let hNum = 0, cNum = 0;
+  // row-reverse なので、先にinsertBeforeしたものが左にたまっていく
+  // entries配列順に並べる → entries[0]が一番右（titlePageの隣）
+  // 左に新しいものを追加したいので、配列末尾が左端
+  // → 配列を逆順でinsertBeforeすればOK（最初にinsertしたものが一番右）
+  const reversed = [...entries].reverse();
+  reversed.forEach(e => {
+    // 番号は正順で付けたいので別途計算
+    const allIdx = entries.indexOf(e);
+    let hCount = 0, cCount = 0;
+    for (let i = 0; i <= allIdx; i++) {
+      if (entries[i].type === 'haiku') hCount++;
+      else cCount++;
     }
-  }).join('');
-
-  // イベント
-  container.querySelectorAll('[data-edit]').forEach(el => {
-    el.addEventListener('click', e => { e.stopPropagation(); openEdit(el.dataset.edit); });
-  });
-  container.querySelectorAll('[data-del]').forEach(el => {
-    el.addEventListener('click', e => { e.stopPropagation(); deleteEntry(el.dataset.del); });
-  });
-
-  // ドラッグ&ドロップ
-  container.querySelectorAll('[data-id]').forEach(el => {
-    el.addEventListener('dragstart', onDragStart);
-    el.addEventListener('dragover', onDragOver);
-    el.addEventListener('dragleave', onDragLeave);
-    el.addEventListener('drop', onDrop);
-    el.addEventListener('dragend', onDragEnd);
+    const col = e.type === 'chapter'
+      ? makeChapterCol(e, cCount, q)
+      : makeHaikuCol(e, hCount, q);
+    inner.insertBefore(col, titlePage);
   });
 }
 
-function renderToc() {
-  const list = document.getElementById('tocList');
-  let hNum = 0; let cNum = 0;
-  list.innerHTML = book.entries.map(e => {
-    if (e.type === 'chapter') {
-      cNum++;
-      return `<li class="toc-item chapter" data-scroll="${e.id}">
-        <span class="toc-num">第${cNum}章</span>${escHtml(e.name || '無題の章')}
-      </li>`;
-    } else {
-      hNum++;
-      const short = (e.text || '').slice(0, 10);
-      return `<li class="toc-item haiku" data-scroll="${e.id}">
-        <span class="toc-num">${hNum}</span>${escHtml(short)}
-      </li>`;
-    }
-  }).join('');
-
-  list.querySelectorAll('[data-scroll]').forEach(el => {
-    el.addEventListener('click', () => {
-      const target = document.querySelector(`[data-id="${el.dataset.scroll}"]`);
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-  });
+function makeHaikuCol(e, num, q) {
+  const col = document.createElement('div');
+  col.className = 'col-haiku';
+  col.dataset.id = e.id;
+  col.innerHTML = `
+    <div class="haiku-body">
+      <div class="haiku-text-v">${highlight(e.text || '', q)}</div>
+      ${e.note ? `<div class="haiku-note-v">${highlight(e.note, q)}</div>` : ''}
+    </div>
+    <div class="col-bottom"><div class="h-num">${num}</div></div>
+    <div class="col-actions">
+      <button class="act-btn" data-edit="${e.id}">✎ 編集</button>
+      <button class="act-btn del" data-del="${e.id}">✕ 削除</button>
+    </div>`;
+  col.querySelector('[data-edit]').addEventListener('click', ev => { ev.stopPropagation(); openEdit(e.id); });
+  col.querySelector('[data-del]').addEventListener('click', ev => { ev.stopPropagation(); deleteEntry(e.id); });
+  return col;
 }
 
-// ========== ドラッグ&ドロップ ==========
-function onDragStart(e) {
-  dragSrcId = this.dataset.id;
-  this.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
+function makeChapterCol(e, num, q) {
+  const col = document.createElement('div');
+  col.className = 'col-chapter';
+  col.dataset.id = e.id;
+  col.innerHTML = `
+    <div class="ch-num">第${num}章</div>
+    <div class="ch-name">${highlight(e.name || '無題', q)}</div>
+    <div class="col-actions">
+      <button class="act-btn" data-edit="${e.id}">✎ 編集</button>
+      <button class="act-btn del" data-del="${e.id}">✕ 削除</button>
+    </div>`;
+  col.querySelector('[data-edit]').addEventListener('click', ev => { ev.stopPropagation(); openEdit(e.id); });
+  col.querySelector('[data-del]').addEventListener('click', ev => { ev.stopPropagation(); deleteEntry(e.id); });
+  return col;
 }
 
-function onDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  const rect = this.getBoundingClientRect();
-  const mid = rect.top + rect.height / 2;
-  this.classList.remove('drag-over-top', 'drag-over-bottom');
-  if (e.clientY < mid) this.classList.add('drag-over-top');
-  else this.classList.add('drag-over-bottom');
+function scrollToLeft() {
+  document.getElementById('scrollOuter').scrollTo({ left: 0, behavior: 'smooth' });
 }
 
-function onDragLeave() {
-  this.classList.remove('drag-over-top', 'drag-over-bottom');
-}
-
-function onDrop(e) {
-  e.preventDefault();
-  this.classList.remove('drag-over-top', 'drag-over-bottom');
-  const targetId = this.dataset.id;
-  if (!dragSrcId || dragSrcId === targetId) return;
-
-  const rect = this.getBoundingClientRect();
-  const mid = rect.top + rect.height / 2;
-  const insertAfter = e.clientY >= mid;
-
-  const srcIdx = book.entries.findIndex(e => e.id === dragSrcId);
-  const tgtIdx = book.entries.findIndex(e => e.id === targetId);
-  if (srcIdx === -1 || tgtIdx === -1) return;
-
-  const [item] = book.entries.splice(srcIdx, 1);
-  const newTgt = book.entries.findIndex(e => e.id === targetId);
-  book.entries.splice(insertAfter ? newTgt + 1 : newTgt, 0, item);
-
-  saveData();
-  render();
-}
-
-function onDragEnd() {
-  document.querySelectorAll('.dragging, .drag-over-top, .drag-over-bottom').forEach(el => {
-    el.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom');
-  });
-  dragSrcId = null;
-}
-
-// ========== 句モーダル ==========
+// ===== 句モーダル =====
 function openAddHaiku() {
   editingId = null;
   document.getElementById('haikuModalTitle').textContent = '句を追加';
-  document.getElementById('haikuTextInput').value = '';
-  document.getElementById('haikuNoteInput').value = '';
-  document.getElementById('haikuDeleteBtn').style.display = 'none';
+  document.getElementById('haikuText').value = '';
+  document.getElementById('haikuNote').value = '';
+  document.getElementById('haikuDel').style.display = 'none';
   openOverlay('haikuModal');
-  setTimeout(() => document.getElementById('haikuTextInput').focus(), 300);
+  setTimeout(() => document.getElementById('haikuText').focus(), 320);
 }
 
 function openEdit(id) {
-  const entry = book.entries.find(e => e.id === id);
-  if (!entry) return;
+  const e = book.entries.find(e => e.id === id);
+  if (!e) return;
   editingId = id;
-
-  if (entry.type === 'haiku') {
+  if (e.type === 'haiku') {
     document.getElementById('haikuModalTitle').textContent = '句を編集';
-    document.getElementById('haikuTextInput').value = entry.text || '';
-    document.getElementById('haikuNoteInput').value = entry.note || '';
-    document.getElementById('haikuDeleteBtn').style.display = 'inline-block';
+    document.getElementById('haikuText').value = e.text || '';
+    document.getElementById('haikuNote').value = e.note || '';
+    document.getElementById('haikuDel').style.display = 'inline-block';
     openOverlay('haikuModal');
-    setTimeout(() => document.getElementById('haikuTextInput').focus(), 300);
+    setTimeout(() => document.getElementById('haikuText').focus(), 320);
   } else {
     document.getElementById('chapterModalTitle').textContent = '章を編集';
-    document.getElementById('chapterNameInput').value = entry.name || '';
-    document.getElementById('chapterDeleteBtn').style.display = 'inline-block';
+    document.getElementById('chapterName').value = e.name || '';
+    document.getElementById('chapterDel').style.display = 'inline-block';
     openOverlay('chapterModal');
-    setTimeout(() => document.getElementById('chapterNameInput').focus(), 300);
+    setTimeout(() => document.getElementById('chapterName').focus(), 320);
   }
 }
 
 function saveHaiku() {
-  const text = document.getElementById('haikuTextInput').value.trim();
+  const text = document.getElementById('haikuText').value.trim();
   if (!text) { alert('句を入力してください'); return; }
-  const note = document.getElementById('haikuNoteInput').value.trim();
-
+  const note = document.getElementById('haikuNote').value.trim();
+  const isNew = !editingId;
   if (editingId) {
     const e = book.entries.find(e => e.id === editingId);
     if (e) { e.text = text; e.note = note; }
   } else {
     book.entries.push({ id: genId(), type: 'haiku', text, note });
   }
-  saveData();
-  render();
+  saveData(); render();
   closeOverlay('haikuModal');
+  if (isNew) scrollToLeft();
 }
 
-// ========== 章モーダル ==========
+// ===== 章モーダル =====
 function openAddChapter() {
   editingId = null;
   document.getElementById('chapterModalTitle').textContent = '章を追加';
-  document.getElementById('chapterNameInput').value = '';
-  document.getElementById('chapterDeleteBtn').style.display = 'none';
+  document.getElementById('chapterName').value = '';
+  document.getElementById('chapterDel').style.display = 'none';
   openOverlay('chapterModal');
-  setTimeout(() => document.getElementById('chapterNameInput').focus(), 300);
+  setTimeout(() => document.getElementById('chapterName').focus(), 320);
 }
 
 function saveChapter() {
-  const name = document.getElementById('chapterNameInput').value.trim();
+  const name = document.getElementById('chapterName').value.trim();
   if (!name) { alert('章の名前を入力してください'); return; }
-
+  const isNew = !editingId;
   if (editingId) {
     const e = book.entries.find(e => e.id === editingId);
     if (e) e.name = name;
   } else {
     book.entries.push({ id: genId(), type: 'chapter', name });
   }
-  saveData();
-  render();
+  saveData(); render();
   closeOverlay('chapterModal');
+  if (isNew) scrollToLeft();
 }
 
-// ========== 削除 ==========
+// ===== 削除 =====
 function deleteEntry(id) {
   const e = book.entries.find(e => e.id === id);
   if (!e) return;
-  const label = e.type === 'chapter' ? `章「${e.name}」` : `句「${e.text}」`;
+  const label = e.type === 'chapter' ? `章「${e.name}」` : `句「${(e.text||'').slice(0,12)}」`;
   if (!confirm(`${label}を削除しますか？`)) return;
   book.entries = book.entries.filter(e => e.id !== id);
-  saveData();
-  render();
+  saveData(); render();
   closeOverlay('haikuModal');
   closeOverlay('chapterModal');
 }
 
-// ========== 目次モーダル ==========
+// ===== 目次 =====
 function openToc() {
-  const meta = document.getElementById('tocBookMeta');
-  meta.textContent = [book.title, book.author].filter(Boolean).join('　　');
-
-  const list = document.getElementById('tocModalList');
-  let hNum = 0; let cNum = 0;
-  list.innerHTML = book.entries.map(e => {
+  document.getElementById('tocMeta').textContent =
+    [book.title, book.author].filter(Boolean).join('　');
+  let hNum = 0, cNum = 0;
+  document.getElementById('tocList').innerHTML = book.entries.map(e => {
     if (e.type === 'chapter') {
       cNum++;
-      return `<li class="toc-modal-item ch">
-        <span class="toc-modal-num">第${cNum}章</span>${escHtml(e.name || '無題の章')}
-      </li>`;
+      return `<li class="ch"><span class="toc-num-m">第${cNum}章</span>${escHtml(e.name||'無題の章')}</li>`;
     } else {
       hNum++;
-      return `<li class="toc-modal-item hk">
-        <span class="toc-modal-num">${hNum}</span>${escHtml(e.text || '')}
-      </li>`;
+      return `<li class="hk"><span class="toc-num-m">${hNum}</span>${escHtml(e.text||'')}</li>`;
     }
   }).join('');
-
   openOverlay('tocModal');
 }
 
-// ========== エクスポート / インポート ==========
+// ===== 並び替え =====
+function openSort() {
+  sortOrder = book.entries.map(e => ({ ...e }));
+  renderSortList();
+  openOverlay('sortModal');
+}
+
+function renderSortList() {
+  const ul = document.getElementById('sortList');
+  ul.innerHTML = sortOrder.map((e, i) => {
+    const isChapter = e.type === 'chapter';
+    const labelText = isChapter ? `【章】${e.name||'無題'}` : (e.text||'').slice(0, 20);
+    const badgeClass = isChapter ? 'cbadge' : 'hbadge';
+    const badgeText = isChapter ? '章' : '句';
+    const labelClass = isChapter ? 'sort-label ch' : 'sort-label';
+    return `<li class="sort-item" draggable="true" data-sort-idx="${i}">
+      <span class="sort-handle">⠿</span>
+      <span class="${labelClass}">${escHtml(labelText)}</span>
+      <span class="sort-badge ${badgeClass}">${badgeText}</span>
+    </li>`;
+  }).join('');
+
+  const items = ul.querySelectorAll('.sort-item');
+
+  // PC ドラッグ
+  items.forEach(item => {
+    item.addEventListener('dragstart', () => {
+      sortDragSrc = parseInt(item.dataset.sortIdx);
+      setTimeout(() => item.classList.add('dragging-sort'), 0);
+    });
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      items.forEach(i => i.classList.remove('over-sort'));
+      item.classList.add('over-sort');
+    });
+    item.addEventListener('dragleave', () => item.classList.remove('over-sort'));
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      const tgt = parseInt(item.dataset.sortIdx);
+      if (sortDragSrc === null || sortDragSrc === tgt) return;
+      const [moved] = sortOrder.splice(sortDragSrc, 1);
+      sortOrder.splice(tgt, 0, moved);
+      renderSortList();
+    });
+    item.addEventListener('dragend', () => {
+      items.forEach(i => i.classList.remove('dragging-sort','over-sort'));
+      sortDragSrc = null;
+    });
+  });
+
+  // スマホ タッチ
+  let touchSrcIdx = null;
+  items.forEach(item => {
+    item.addEventListener('touchstart', () => {
+      touchSrcIdx = parseInt(item.dataset.sortIdx);
+      item.classList.add('dragging-sort');
+    }, { passive: true });
+
+    item.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const tgt = el && el.closest('.sort-item');
+      items.forEach(i => i.classList.remove('over-sort'));
+      if (tgt && tgt !== item) tgt.classList.add('over-sort');
+    }, { passive: false });
+
+    item.addEventListener('touchend', e => {
+      const t = e.changedTouches[0];
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const tgt = el && el.closest('.sort-item');
+      item.classList.remove('dragging-sort');
+      items.forEach(i => i.classList.remove('over-sort'));
+      if (tgt && touchSrcIdx !== null) {
+        const tgtIdx = parseInt(tgt.dataset.sortIdx);
+        if (touchSrcIdx !== tgtIdx) {
+          const [moved] = sortOrder.splice(touchSrcIdx, 1);
+          sortOrder.splice(tgtIdx, 0, moved);
+          renderSortList();
+        }
+      }
+      touchSrcIdx = null;
+    });
+  });
+}
+
+function applySort() {
+  book.entries = sortOrder;
+  saveData(); render();
+  closeOverlay('sortModal');
+}
+
+// ===== エクスポート/インポート =====
 function exportData() {
   const blob = new Blob([JSON.stringify(book, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  const fname = (book.title || '句集') + '_' + new Date().toISOString().slice(0,10) + '.json';
-  a.download = fname;
+  a.download = (book.title || '句集') + '_' + new Date().toISOString().slice(0,10) + '.json';
   a.click();
 }
-
 function importData() { document.getElementById('fileInput').click(); }
 
 document.getElementById('fileInput').addEventListener('change', e => {
@@ -1074,13 +1066,11 @@ document.getElementById('fileInput').addEventListener('change', e => {
   const reader = new FileReader();
   reader.onload = ev => {
     try {
-      const parsed = JSON.parse(ev.target.result);
-      if (parsed && Array.isArray(parsed.entries)) {
-        if (confirm(`「${parsed.title || '無題'}」を読み込みます。現在のデータは上書きされます。よろしいですか？`)) {
-          book = parsed;
-          saveData();
-          applyMeta();
-          render();
+      const p = JSON.parse(ev.target.result);
+      if (p && Array.isArray(p.entries)) {
+        if (confirm(`「${p.title||'無題'}」を読み込みます。現在のデータは上書きされます。よろしいですか？`)) {
+          book = p;
+          saveData(); applyMeta(); render();
         }
       } else { alert('句集のJSONファイルではありません'); }
     } catch(err) { alert('読み込みに失敗しました'); }
@@ -1089,51 +1079,54 @@ document.getElementById('fileInput').addEventListener('change', e => {
   reader.readAsText(file);
 });
 
-// ========== 検索 ==========
+// ===== 検索 =====
 document.getElementById('searchInput').addEventListener('input', e => {
   searchQuery = e.target.value.trim();
-  document.getElementById('searchClearBtn').classList.toggle('show', searchQuery.length > 0);
+  document.getElementById('sClear').classList.toggle('show', searchQuery.length > 0);
   render();
 });
-document.getElementById('searchClearBtn').addEventListener('click', () => {
+document.getElementById('sClear').addEventListener('click', () => {
   searchQuery = '';
   document.getElementById('searchInput').value = '';
-  document.getElementById('searchClearBtn').classList.remove('show');
+  document.getElementById('sClear').classList.remove('show');
   render();
 });
 
-// ========== オーバーレイ ==========
+// ===== オーバーレイ =====
 function openOverlay(id) { document.getElementById(id).classList.add('open'); }
 function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
 
 document.querySelectorAll('.overlay').forEach(el => {
   el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
 });
-
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(el => el.classList.remove('open'));
 });
 
-// ========== イベント登録 ==========
+// ===== イベント =====
 document.getElementById('btnAddHaiku').addEventListener('click', openAddHaiku);
 document.getElementById('btnAddChapter').addEventListener('click', openAddChapter);
 document.getElementById('btnToc').addEventListener('click', openToc);
+document.getElementById('btnSort').addEventListener('click', openSort);
 document.getElementById('btnExport').addEventListener('click', exportData);
 document.getElementById('btnImport').addEventListener('click', importData);
 
 document.getElementById('haikuModalClose').addEventListener('click', () => closeOverlay('haikuModal'));
-document.getElementById('haikuCancelBtn').addEventListener('click', () => closeOverlay('haikuModal'));
-document.getElementById('haikuSaveBtn').addEventListener('click', saveHaiku);
-document.getElementById('haikuDeleteBtn').addEventListener('click', () => deleteEntry(editingId));
+document.getElementById('haikuCancel').addEventListener('click', () => closeOverlay('haikuModal'));
+document.getElementById('haikuSave').addEventListener('click', saveHaiku);
+document.getElementById('haikuDel').addEventListener('click', () => deleteEntry(editingId));
 
 document.getElementById('chapterModalClose').addEventListener('click', () => closeOverlay('chapterModal'));
-document.getElementById('chapterCancelBtn').addEventListener('click', () => closeOverlay('chapterModal'));
-document.getElementById('chapterSaveBtn').addEventListener('click', saveChapter);
-document.getElementById('chapterDeleteBtn').addEventListener('click', () => deleteEntry(editingId));
+document.getElementById('chapterCancel').addEventListener('click', () => closeOverlay('chapterModal'));
+document.getElementById('chapterSave').addEventListener('click', saveChapter);
+document.getElementById('chapterDel').addEventListener('click', () => deleteEntry(editingId));
 
-document.getElementById('tocModalClose').addEventListener('click', () => closeOverlay('tocModal'));
+document.getElementById('tocClose').addEventListener('click', () => closeOverlay('tocModal'));
+document.getElementById('sortClose').addEventListener('click', () => closeOverlay('sortModal'));
+document.getElementById('sortCancel').addEventListener('click', () => closeOverlay('sortModal'));
+document.getElementById('sortApply').addEventListener('click', applySort);
 
-// ========== 起動 ==========
+// ===== 起動 =====
 loadData();
 </script>
 </body>
