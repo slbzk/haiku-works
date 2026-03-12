@@ -798,22 +798,15 @@ function render() {
   }
 
   let hNum = 0, cNum = 0;
-  // row-reverse なので、先にinsertBeforeしたものが左にたまっていく
-  // entries配列順に並べる → entries[0]が一番右（titlePageの隣）
-  // 左に新しいものを追加したいので、配列末尾が左端
-  // → 配列を逆順でinsertBeforeすればOK（最初にinsertしたものが一番右）
-  const reversed = [...entries].reverse();
-  reversed.forEach(e => {
-    // 番号は正順で付けたいので別途計算
-    const allIdx = entries.indexOf(e);
-    let hCount = 0, cCount = 0;
-    for (let i = 0; i <= allIdx; i++) {
-      if (entries[i].type === 'haiku') hCount++;
-      else cCount++;
-    }
+  // flex-direction:row-reverse のため、insertBefore(col, titlePage) を
+  // 配列の正順で行うと、先に挿入したもの（entries[0]）が右端（titlePageの隣）に、
+  // 後から挿入したもの（entries[N]）が左端に来る → 新しい句が左に増える
+  entries.forEach(e => {
+    if (e.type === 'haiku') hNum++;
+    else cNum++;
     const col = e.type === 'chapter'
-      ? makeChapterCol(e, cCount, q)
-      : makeHaikuCol(e, hCount, q);
+      ? makeChapterCol(e, cNum, q)
+      : makeHaikuCol(e, hNum, q);
     inner.insertBefore(col, titlePage);
   });
 }
