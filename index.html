@@ -593,7 +593,45 @@ mark { background: rgba(184,146,42,0.32); color: var(--ink); border-radius: 2px;
 .mbtn.danger { color: var(--red); border-color: rgba(155,34,23,0.35); }
 .mbtn.danger:hover, .mbtn.danger:active { background: var(--red); color: white; border-color: var(--red); }
 
-/* 目次 */
+/* スロット切替タブ */
+.slot-bar {
+  flex-shrink: 0;
+  background: var(--ink);
+  border-bottom: 1px solid rgba(184,146,42,0.25);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+  height: 36px;
+}
+.slot-tab {
+  background: none;
+  border: 1px solid rgba(184,146,42,0.3);
+  border-radius: 3px 3px 0 0;
+  border-bottom: none;
+  color: rgba(232,201,106,0.5);
+  padding: 4px 14px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.18s;
+  height: 100%;
+  white-space: nowrap;
+}
+.slot-tab:hover { color: var(--gold2); border-color: rgba(184,146,42,0.5); }
+.slot-tab.active {
+  background: rgba(184,146,42,0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+  font-weight: 500;
+}
+.slot-label {
+  font-size: 10px;
+  color: var(--ink3);
+  letter-spacing: 0.1em;
+  margin-left: auto;
+}
 .toc-meta { font-family: 'Shippori Mincho B1', serif; font-size: 13px; text-align: center; color: var(--ink3); letter-spacing: 0.2em; margin-bottom: 12px; }
 .toc-list-m { list-style: none; }
 .toc-list-m li {
@@ -639,6 +677,12 @@ mark { background: rgba(184,146,42,0.32); color: var(--ink); border-radius: 2px;
     <button class="tbtn" id="btnImport">📥</button>
   </div>
 </header>
+
+<div class="slot-bar">
+  <button class="slot-tab active" id="slotTab1" data-slot="1">句集１</button>
+  <button class="slot-tab" id="slotTab2" data-slot="2">句集２</button>
+  <span class="slot-label" id="slotLabel"></span>
+</div>
 
 <div class="bookinfo-bar">
   <span class="bi-label">題</span>
@@ -750,7 +794,10 @@ mark { background: rgba(184,146,42,0.32); color: var(--ink); border-radius: 2px;
 <input type="file" id="fileInput" accept=".json" style="display:none">
 
 <script>
-const SK = 'kuushu_editor_v1';
+const SK_BASE = 'kuushu_editor_v1';
+let currentSlot = 1;
+function SK() { return SK_BASE + '_slot' + currentSlot; }
+
 let book = { title: '', author: '', entries: [] };
 let editingId = null;
 let searchQuery = '';
@@ -801,12 +848,16 @@ function genId() {
 
 // ===== 保存・読込 =====
 function saveData() {
-  try { localStorage.setItem(SK, JSON.stringify(book)); } catch(e) {}
+  try {
+    localStorage.setItem(SK(), JSON.stringify(book));
+    updateSlotUI();
+  } catch(e) {}
 }
 
 function loadData() {
+  book = { title: '', author: '', entries: [] };
   try {
-    const d = localStorage.getItem(SK);
+    const d = localStorage.getItem(SK());
     if (d) {
       const p = JSON.parse(d);
       if (p && Array.isArray(p.entries)) book = p;
@@ -814,6 +865,33 @@ function loadData() {
   } catch(e) { console.error('load error', e); }
   applyMeta();
   render();
+  updateSlotUI();
+}
+
+function switchSlot(slot) {
+  if (slot === currentSlot) return;
+  currentSlot = slot;
+  searchQuery = '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('sClear').classList.remove('show');
+  loadData();
+}
+
+function updateSlotUI() {
+  document.querySelectorAll('.slot-tab').forEach(tab => {
+    tab.classList.toggle('active', parseInt(tab.dataset.slot) === currentSlot);
+    // タブに句集タイトルを反映
+    const slotBook = (() => {
+      try {
+        const d = localStorage.getItem(SK_BASE + '_slot' + tab.dataset.slot);
+        return d ? JSON.parse(d) : null;
+      } catch(e) { return null; }
+    })();
+    const title = slotBook && slotBook.title ? slotBook.title : `句集${tab.dataset.slot}`;
+    tab.textContent = title;
+  });
+  const label = book.entries.length + '句';
+  document.getElementById('slotLabel').textContent = label;
 }
 
 // ===== 書誌 =====
@@ -834,7 +912,7 @@ function updateTitlePage() {
 
 document.getElementById('biTitle').addEventListener('input', e => {
   book.title = e.target.value.trim();
-  updateTitlePage(); saveData();
+  updateTitlePage(); saveData(); updateSlotUI();
 });
 document.getElementById('biAuthor').addEventListener('input', e => {
   book.author = e.target.value.trim();
@@ -1220,6 +1298,9 @@ document.getElementById('sortCancel').addEventListener('click', () => closeOverl
 document.getElementById('sortApply').addEventListener('click', applySort);
 
 // ===== 起動 =====
+document.querySelectorAll('.slot-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchSlot(parseInt(tab.dataset.slot)));
+});
 loadData();
 </script>
 </body>
